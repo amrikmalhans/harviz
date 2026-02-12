@@ -78,3 +78,16 @@ fn missing_input_path_fails() {
         .failure()
         .stderr(predicate::str::contains("failed to read file"));
 }
+
+#[test]
+fn help_output_exposes_core_usage_and_options() {
+    let mut cmd = Command::cargo_bin("perf_tool").expect("binary should build");
+    cmd.arg("--help")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Analyze HAR files"))
+        .stdout(predicate::str::contains("Usage:"))
+        .stdout(predicate::str::contains("--top"))
+        .stdout(predicate::str::contains("--json"))
+        .stdout(predicate::str::contains("--help"));
+}

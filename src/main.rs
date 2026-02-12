@@ -8,7 +8,7 @@ mod har;
 mod report;
 
 #[derive(Parser, Debug)]
-#[command(name = "haranalyze", version, about = "Analyze HAR files")]
+#[command(name = "perf_tool", version, about = "Analyze HAR files")]
 struct Args {
     // Path to the HAR file
     path: PathBuf,
