@@ -18,6 +18,9 @@ struct Args {
     // Output JSON
     #[arg(long, default_value_t = false)]
     json: bool,
+    // Group request metrics by dimension
+    #[arg(long, value_enum)]
+    group_by: Option<report::GroupBy>,
 }
 
 fn render_text(report: &report::Report) {
@@ -34,6 +37,21 @@ fn render_text(report: &report::Report) {
     for row in &report.top_largest {
         println!("{:>10}  {}", report::format_bytes(row.bytes), row.url);
     }
+
+    if report.group_by.is_some() {
+        println!("\ngroups by host (top {}):", report.top_groups.len());
+        for group in &report.top_groups {
+            println!(
+                "{:>4} req  {:>8.2} ms total  {:>8.2} ms avg  {:>8.2} ms p95  {:>10}  {}",
+                group.count,
+                group.total_time_ms,
+                group.avg_time_ms,
+                group.p95_time_ms,
+                report::format_bytes(group.total_bytes),
+                group.key
+            );
+        }
+    }
 }
 
 fn main() -> Result<()> {
@@ -43,7 +61,7 @@ fn main() -> Result<()> {
         .with_context(|| format!("failed to read file: {}", args.path.display()))?;
 
     let har = har::parse_har(&bytes)?;
-    let report = report::build_report(&har.log.entries, args.top);
+    let report = report::build_report(&har.log.entries, args.top, args.group_by);
 
     if args.json {
         let out = serde_json::to_string_pretty(&report)

@@ -11,6 +11,7 @@ Given a HAR file, `perf_tool` reports:
 - total response bytes
 - top N slowest requests
 - top N largest requests by bytes
+- optional top N host groups with count/time/size metrics
 
 It supports both human-readable text output and JSON output.
 
@@ -44,6 +45,12 @@ Emit JSON:
 cargo run -- --json tests/fixtures/sample.har
 ```
 
+Group results by host:
+
+```bash
+cargo run -- --group-by host tests/fixtures/sample.har
+```
+
 Show help:
 
 ```bash
@@ -68,6 +75,9 @@ largest 4 by bytes:
    1.20 KB  https://example.com/a
       70 B  https://example.com/b
        0 B  https://example.com/d
+
+groups by host (top 1):
+   4 req    565.75 ms total    141.44 ms avg    320.50 ms p95     3.29 KB  example.com
 ```
 
 ## Example JSON shape
@@ -79,6 +89,7 @@ largest 4 by bytes:
   "total_bytes": 3372,
   "top_requested": 10,
   "top_returned": 4,
+  "group_by": "host",
   "top_slowest": [
     {
       "url": "https://example.com/a",
@@ -91,6 +102,16 @@ largest 4 by bytes:
       "url": "https://example.com/c",
       "time_ms": 180.25,
       "bytes": 2078
+    }
+  ],
+  "top_groups": [
+    {
+      "key": "example.com",
+      "count": 4,
+      "total_time_ms": 565.75,
+      "avg_time_ms": 141.4375,
+      "p95_time_ms": 320.5,
+      "total_bytes": 3372
     }
   ]
 }
